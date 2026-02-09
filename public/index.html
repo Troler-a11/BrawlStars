@@ -1,0 +1,34 @@
+async function searchPlayer() {
+    const tag = document.getElementById('playerTag').value.trim();
+    if(!tag) return alert("Введи тег!");
+    
+    const resultDiv = document.getElementById('result');
+    resultDiv.style.display = 'block';
+    resultDiv.innerHTML = "Завантаження...";
+
+    try {
+        // Заміни URL на посилання від твого Render після деплою
+        const response = await fetch(`/api/player/${tag.replace('#', '')}`);
+        const data = await response.json();
+
+        if(data.error) throw new Error(data.error);
+
+        resultDiv.innerHTML = `
+            <h2>${data.name}</h2>
+            <p>Клуб: ${data.club?.name || 'Немає'}</p>
+            <div style="font-size: 24px; color: #f1c40f;">🏆 ${data.trophies}</div>
+            <p>Рівень: ${data.expLevel} | Перемог 3v3: ${data['3vs3Victories']}</p>
+            <h3>Бійці (${data.brawlers.length}):</h3>
+            <div class="brawler-grid">
+                ${data.brawlers.map(b => `
+                    <div class="brawler-item">
+                        <b>${b.name}</b><br>
+                        🏆 ${b.trophies} (Ранг ${b.rank})
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    } catch (err) {
+        resultDiv.innerHTML = "Помилка: " + err.message;
+    }
+}
